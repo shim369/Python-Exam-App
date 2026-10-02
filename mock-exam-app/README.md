@@ -48,6 +48,7 @@ exam3/
 │   └── ...                       #   1.1 〜 18.2
 └── mock-exam-app/
     ├── .gitignore                # .venv/ や results/ などを除外
+    ├── .streamlit/config.toml    # テーマ設定 (ダークモード、見出しのフォントサイズ)
     ├── app.py                    # アプリ本体 (開始画面 → 出題画面 → 結果画面)
     ├── exam_core.py              # 章ごとの出題数などの定数、問題・履歴の読み書き
     ├── exams/

@@ -1,0 +1,5 @@
+[theme]
+# 既定をダークモードにする
+base = "dark"
+# h1 (st.title) を 1.5rem にする (既定は 2.75rem)。h2 以降は既定のまま
+headingFontSizes = ["1.5rem"]
