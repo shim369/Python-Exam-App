@@ -1,0 +1,645 @@
+{
+  "title": "第1回",
+  "questions": [
+    {
+      "id": "exam01-q01",
+      "chapter": 1,
+      "section": "1.1",
+      "topic": "pip install -r と -c (constraints.txt) を併用したときにインストールされるパッケージ",
+      "question": "あるアプリケーションのディレクトリに次の2つのファイルがあります。仮想環境を有効化して `pip install -r requirements.txt -c constraints.txt` を実行したとき、requirements.txt と constraints.txt に書かれた3つのパッケージについて、結果として正しいものはどれですか。",
+      "code": "# requirements.txt\nMarkdown\nPyYAML==6.0.2\n\n# constraints.txt\nJinja2==3.1.4\nMarkdown==3.6",
+      "choices": [
+        "Markdown 3.6 と PyYAML 6.0.2 がインストールされ、Jinja2 はインストールされない",
+        "Markdown 3.6、PyYAML 6.0.2、Jinja2 3.1.4 の3つがすべてインストールされる",
+        "Markdown はその時点の最新版、PyYAML は 6.0.2 がインストールされ、Jinja2 はインストールされない",
+        "requirements.txt の Markdown にバージョンが書かれていないため、constraints.txt と矛盾してインストールに失敗する"
+      ],
+      "answerIndex": 0,
+      "explanation": "constraints.txt は requirements.txt に同名のパッケージがある場合にだけ、そのバージョンを制限します。Markdown は requirements.txt にあるので constraints.txt の指定どおり 3.6 になり、PyYAML は requirements.txt の 6.0.2 になります。constraints.txt に書かれているだけのパッケージ(Jinja2)はインストールされないため、3つすべてがインストールされるという選択肢は誤りです。constraints.txt の制限を受けるので Markdown が最新版になることもありません。requirements.txt 側にバージョン指定がないことは矛盾ではなく、矛盾してエラーになるのは「PyYAML<6.0」のように両者の指定が両立しない場合です。"
+    },
+    {
+      "id": "exam01-q02",
+      "chapter": 2,
+      "section": "2.1",
+      "topic": "PEP 8 の命名規約と括弧前の空白に沿ったクラス・メソッド定義",
+      "question": "商品の価格表を表すクラスを定義します。PEP 8 の命名規約と空白の使い方にすべて沿っている書き方はどれですか。",
+      "code": null,
+      "choices": [
+        "class PriceTable:\n    def total_price(self, items):\n        return sum(items)",
+        "class price_table:\n    def total_price(self, items):\n        return sum(items)",
+        "class PriceTable:\n    def totalPrice(self, items):\n        return sum(items)",
+        "class PriceTable:\n    def total_price(self, items):\n        return sum (items)"
+      ],
+      "answerIndex": 0,
+      "explanation": "PEP 8 では、クラス名は CamelCase(PriceTable)、関数・メソッド名は lower_case_with_underscores(total_price)にし、関数呼び出しの括弧の直前には空白を入れません。class price_table は、クラス名を関数や変数の書き方にしているので誤りです。def totalPrice はメソッド名を CamelCase にしているので誤りです。sum (items) は括弧の直前に空白があるので誤りです。"
+    },
+    {
+      "id": "exam01-q03",
+      "chapter": 2,
+      "section": "2.2",
+      "topic": "select でルールを指定したとき ruff check が検出するルールコード (デフォルトの E が外れる)",
+      "question": "pyproject.toml に次の設定があるプロジェクトで、report.py に対して `ruff check report.py` を実行しました。検出されるルールコードの組み合わせとして正しいものはどれですか(7行目は 88 文字を超えています)。",
+      "code": "# pyproject.toml\n[tool.ruff.lint]\nselect = [\"F\", \"I\"]\n\n# report.py\nimport sys\nimport json\nimport os\n\n\ndef show(record):\n    print(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True, separators=(\",\", \": \")))",
+      "choices": [
+        "I001(import の並び順)と F401(未使用の import)",
+        "I001(import の並び順)、F401(未使用の import)、E501(1行の文字数超過)",
+        "F401(未使用の import)と E501(1行の文字数超過)",
+        "F401(未使用の import)のみ"
+      ],
+      "answerIndex": 0,
+      "explanation": "select で有効にしたのは F(Pyflakes)と I(isort)のルールだけです。import の順序が sys → json → os とアルファベット順になっていないので I001 が、sys と os を使っていないので F401 が検出されます。デフォルトでは E の一部も有効ですが、select を指定するとそのルールだけが有効になるため、E501(行長超過)は検出されません。したがって E501 を含む選択肢は誤りです。また、I を select に含めているので I001 は検出されます。F401 のみという選択肢は、I001 を見落としているので誤りです。"
+    },
+    {
+      "id": "exam01-q04",
+      "chapter": 3,
+      "section": "3.1",
+      "topic": "例外クラスの継承階層で捕捉する except 節と else/finally の実行順",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "def ratio(values, i):\n    try:\n        result = 100 / values[i]\n    except ArithmeticError:\n        print(\"A\", end=\" \")\n        result = 0\n    except LookupError:\n        print(\"L\", end=\" \")\n        result = -1\n    else:\n        print(\"E\", end=\" \")\n    finally:\n        print(\"F\", end=\" \")\n    return result\n\n\nnums = [4, 0]\nfor i in (0, 1, 5):\n    print(ratio(nums, i))",
+      "choices": [
+        "E F 25.0\nA F 0\nL F -1",
+        "E F 25.0\nA F 0\nF -1",
+        "F 25.0\nA F 0\nL F -1",
+        "E F 25.0\nF 0\nF -1"
+      ],
+      "answerIndex": 0,
+      "explanation": "i=0 では例外が起きないので else 節(E)と finally 節(F)が実行され、25.0 が返ります。i=1 では ZeroDivisionError が起き、これは ArithmeticError のサブクラスなので except ArithmeticError で捕捉されます(A F 0)。i=5 では IndexError が起き、これは LookupError のサブクラスなので except LookupError で捕捉されます(L F -1)。親クラスを指定した except 節でも子クラスの例外を捕捉できるので、A や L が出力されない選択肢は誤りです。else 節は例外が起きなかったときにだけ実行されるので、i=0 で E が出力されない選択肢も誤りです。"
+    },
+    {
+      "id": "exam01-q05",
+      "chapter": 3,
+      "section": "3.2",
+      "topic": "@contextmanager で try-finally を使わない場合、例外発生時に yield 後の処理が実行されない",
+      "question": "次のコードは、with ブロックを抜けるときに必ず「close db」を出力することを意図しています。実行したときの出力として正しいものはどれですか。",
+      "code": "from contextlib import contextmanager\n\n\n@contextmanager\ndef opened(name):\n    print(f\"open {name}\")\n    yield name.upper()\n    print(f\"close {name}\")\n\n\ntry:\n    with opened(\"db\") as conn:\n        print(conn)\n        raise RuntimeError(\"boom\")\nexcept RuntimeError as e:\n    print(\"error:\", e)",
+      "choices": [
+        "open db\nDB\nerror: boom",
+        "open db\nDB\nclose db\nerror: boom",
+        "open db\ndb\nclose db\nerror: boom",
+        "open db\nDB\nerror: boom\nclose db"
+      ],
+      "answerIndex": 0,
+      "explanation": "@contextlib.contextmanager で作ったコンテキストマネージャーでは、with ブロック内で発生した例外が yield の位置で送出されます。yield を try-finally で囲んでいないため、yield より後ろの print(\"close db\") は実行されず、例外はそのまま外側の except 節に伝わります。as で受け取る値は yield した name.upper() なので、2行目は「DB」です。close db が出力される選択肢は、後処理が必ず実行されると勘違いしたものです。意図どおりにするには yield を try: ... finally: で囲み、finally 節で close 処理を行います。"
+    },
+    {
+      "id": "exam01-q06",
+      "chapter": 3,
+      "section": "3.3",
+      "topic": "マッピングパターンが余分なキーでもマッチすることと case の評価順・ガード・**rest",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "def route(event):\n    match event:\n        case {\"type\": \"click\", \"x\": x} if x < 0:\n            return \"invalid\"\n        case {\"type\": \"click\"}:\n            return \"click\"\n        case {\"type\": \"click\", \"x\": x, \"y\": y}:\n            return f\"click at {x},{y}\"\n        case {\"type\": (\"key\" | \"scroll\") as kind, **rest}:\n            return f\"{kind}:{len(rest)}\"\n        case _:\n            return \"unknown\"\n\n\nevents = [\n    {\"type\": \"click\", \"x\": 3, \"y\": 4},\n    {\"type\": \"scroll\", \"dy\": -2, \"smooth\": True},\n    {\"x\": 1, \"type\": \"click\", \"y\": -5},\n    {\"kind\": \"key\"},\n]\nprint([route(e) for e in events])",
+      "choices": [
+        "['click', 'scroll:2', 'click', 'unknown']",
+        "['click at 3,4', 'scroll:2', 'click at 1,-5', 'unknown']",
+        "['click', 'scroll:3', 'click', 'unknown']",
+        "['click', 'scroll:2', 'invalid', 'key:0']"
+      ],
+      "answerIndex": 0,
+      "explanation": "マッピングパターンは、パターンに書いたキーがあれば、余分なキーがあってもマッチします。case は上から順に評価されるので、type が click の辞書はすべて2番目の case {\"type\": \"click\"} にマッチし、3番目の case に到達することはありません(click at ... になる選択肢は誤り)。1つ目のガードは x < 0 のときだけ成立し、3番目のイベントは x=1 なので invalid にはなりません(y が負でも関係ありません)。**rest にはパターンで指定しなかったキーだけが入るので、scroll の rest は dy と smooth の2件です(scroll:3 は誤り)。4番目の辞書には type キーがないので、ワイルドカード _ にマッチして unknown になります。"
+    },
+    {
+      "id": "exam01-q07",
+      "chapter": 3,
+      "section": "3.4",
+      "topic": "ミュータブルなデフォルト値が関数定義時に一度だけ評価され共有されるバグ",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "def add_tag(tag, tags=[]):\n    tags.append(tag)\n    return tags\n\n\na = add_tag(\"x\")\nb = add_tag(\"y\", [])\nc = add_tag(\"z\")\nprint(a, b, c)",
+      "choices": [
+        "['x', 'z'] ['y'] ['x', 'z']",
+        "['x'] ['y'] ['z']",
+        "['x'] ['y'] ['x', 'z']",
+        "['x', 'y', 'z'] ['y'] ['x', 'y', 'z']"
+      ],
+      "answerIndex": 0,
+      "explanation": "デフォルト値の式は関数定義時に一度だけ評価されるので、tags を省略した呼び出しは毎回同じリストオブジェクトを共有します。1回目(x)と3回目(z)はどちらも共有のリストに追加するため、a と c は同じリスト ['x', 'z'] を指します。a は呼び出し時点の内容のコピーではないので、['x'] のままにはなりません。2回目は新しい空リストを明示的に渡しているので、共有のリストには影響せず b は ['y'] です。呼び出しごとに新しいリストを使うには、デフォルト値を None にして、関数内で tags = [] と初期化します。"
+    },
+    {
+      "id": "exam01-q08",
+      "chapter": 3,
+      "section": "3.6",
+      "topic": "辞書内包表記でのキーの上書きと集合内包表記での重複排除",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "words = [\"apple\", \"avocado\", \"banana\", \"blueberry\", \"cherry\"]\nfirst = {w[0]: w for w in words}\nlengths = {len(w) for w in words}\nprint(first, len(lengths))",
+      "choices": [
+        "{'a': 'avocado', 'b': 'blueberry', 'c': 'cherry'} 4",
+        "{'a': 'apple', 'b': 'banana', 'c': 'cherry'} 4",
+        "{'a': 'avocado', 'b': 'blueberry', 'c': 'cherry'} 5",
+        "{'a': 'apple', 'b': 'banana', 'c': 'cherry'} 5"
+      ],
+      "answerIndex": 0,
+      "explanation": "辞書内包表記では、同じキーが複数回出てくると後から出てきた値で上書きされます。'a' は apple の後に avocado、'b' は banana の後に blueberry で上書きされるので、{'a': 'avocado', 'b': 'blueberry', 'c': 'cherry'} になります。最初の値が残ると考えた選択肢は誤りです。集合内包表記の結果は set なので重複が除かれ、文字数 5, 7, 6, 9, 6 は {5, 6, 7, 9} の4要素になります。5 になる選択肢は、重複が除かれることを見落としています。"
+    },
+    {
+      "id": "exam01-q09",
+      "chapter": 3,
+      "section": "3.7",
+      "topic": "ジェネレーターの遅延実行と、一度消費したジェネレーターが空になること",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "def countdown(n):\n    print(\"start\")\n    while n > 0:\n        yield n\n        n -= 1\n\n\ngen = countdown(3)\nprint(\"created\")\nfirst = next(gen)\nrest = list(gen)\nprint(first, rest, list(gen))",
+      "choices": [
+        "created\nstart\n3 [2, 1] []",
+        "start\ncreated\n3 [2, 1] []",
+        "created\nstart\n3 [2, 1] [2, 1]",
+        "created\nstart\n3 [3, 2, 1] [3, 2, 1]"
+      ],
+      "answerIndex": 0,
+      "explanation": "ジェネレーター関数を呼び出すと、ジェネレーターオブジェクトが作られるだけで、関数の本体はまだ実行されません。そのため created が先に出力され、next() を呼んだ時点で初めて start が出力されます。next() で 3 を取り出した後、list(gen) は残りの 2, 1 を取り出します。ジェネレーターは一度消費すると空になるので、最後の list(gen) は [] です。2回目の list(gen) でも値が得られる、あるいは最初から値を取り直すと考えた選択肢は誤りです。"
+    },
+    {
+      "id": "exam01-q10",
+      "chapter": 3,
+      "section": "3.8",
+      "topic": "複数デコレーターの適用順と functools.wraps を使わない場合の __name__",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "def bold(func):\n    def wrapper(text):\n        return \"<b>\" + func(text) + \"</b>\"\n    return wrapper\n\n\ndef upper(func):\n    def wrapper(text):\n        return func(text).upper()\n    return wrapper\n\n\n@bold\n@upper\ndef greet(text):\n    return \"hi \" + text\n\n\nprint(greet(\"bob\"), greet.__name__)",
+      "choices": [
+        "<b>HI BOB</b> wrapper",
+        "<B>HI BOB</B> wrapper",
+        "<b>HI BOB</b> greet",
+        "<B>HI BOB</B> greet"
+      ],
+      "answerIndex": 0,
+      "explanation": "複数のデコレーターは、関数に近い内側から順に適用されます。このコードは greet = bold(upper(greet)) と同じなので、まず upper の wrapper が \"hi bob\" を大文字にし、その結果を bold の wrapper が <b> タグで囲みます。タグは大文字化された後に付くので <b>HI BOB</b> になります。<B> になる選択肢は、適用順を逆に考えています。また、どちらのデコレーターも functools.wraps を使っていないため、greet は bold が返した wrapper 関数に置き換わり、__name__ は 'wrapper' になります。"
+    },
+    {
+      "id": "exam01-q11",
+      "chapter": 4,
+      "section": "4.2",
+      "topic": "クラスメソッドによる代替コンストラクター、@property、__eq__/__repr__ の組み合わせ",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "class Temperature:\n    def __init__(self, celsius):\n        self.celsius = celsius\n\n    @classmethod\n    def from_fahrenheit(cls, f):\n        return cls((f - 32) * 5 / 9)\n\n    @property\n    def kelvin(self):\n        return self.celsius + 273\n\n    def __eq__(self, other):\n        return round(self.celsius) == round(other.celsius)\n\n    def __repr__(self):\n        return f\"Temperature({self.celsius:.1f})\"\n\n\na = Temperature(37)\nb = Temperature.from_fahrenheit(98.6)\nprint(a == b, b, a.kelvin)",
+      "choices": [
+        "True Temperature(37.0) 310",
+        "False Temperature(37.0) 310",
+        "True Temperature(37.0) <bound method Temperature.kelvin of Temperature(37.0)>",
+        "from_fahrenheit を呼び出す行で、引数が足りないため TypeError が発生する"
+      ],
+      "answerIndex": 0,
+      "explanation": "@classmethod を付けたメソッドは、第1引数にクラスオブジェクトが暗黙的に渡されるので、Temperature.from_fahrenheit(98.6) のようにクラスから直接呼び出せます(TypeError にはなりません)。cls(...) は Temperature(...) と同じで、インスタンスを返す代替コンストラクターとして働きます。== は __eq__ で定義したとおり、四捨五入した摂氏の値で比較されるので True です(同一オブジェクトかどうかは比較しません)。b の表示には __repr__ が使われ、Temperature(37.0) になります。kelvin は @property でプロパティ化されているので、括弧なしでアクセスすると戻り値 310 が得られ、メソッドオブジェクトは表示されません。"
+    },
+    {
+      "id": "exam01-q12",
+      "chapter": 4,
+      "section": "4.3",
+      "topic": "多重継承の MRO で属性・super() が探索される順序",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "class Root:\n    def hello(self):\n        return \"Root\"\n\n\nclass Base1(Root):\n    pass\n\n\nclass Base2:\n    def hello(self):\n        return \"Base2\"\n\n    def bye(self):\n        return \"Base2 bye\"\n\n\nclass Custom(Base1, Base2):\n    def bye(self):\n        return \"Custom/\" + super().bye()\n\n\nc = Custom()\nprint(c.hello(), c.bye())",
+      "choices": [
+        "Root Custom/Base2 bye",
+        "Base2 Custom/Base2 bye",
+        "Root Base2 bye",
+        "super().bye() を呼び出す行で AttributeError が発生する"
+      ],
+      "answerIndex": 0,
+      "explanation": "class Custom(Base1, Base2) のメソッド探索順(MRO)は Custom → Base1 → Root → Base2 → object です。Base1 とその親クラス Root を調べた後に Base2 を調べるので、hello() は Root の定義が使われます。Base2 の hello() が先に見つかると考えた選択肢は誤りです。bye() は Custom でオーバーライドされているので Custom の bye() が実行されます(Base2 bye だけになる選択肢は誤り)。その中の super().bye() は MRO で Custom の次から探索します。Base1・Root には bye() がありませんが、その次の Base2 で見つかるので AttributeError にはならず、「Custom/Base2 bye」が返ります。"
+    },
+    {
+      "id": "exam01-q13",
+      "chapter": 4,
+      "section": "4.4",
+      "topic": "frozen=True の dataclass の属性変更エラー・ハッシュ可能性・asdict",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from dataclasses import asdict, dataclass\n\n\n@dataclass(frozen=True)\nclass Point:\n    x: int\n    y: int = 0\n\n\npoints = {Point(1, 2), Point(1, 2), Point(1)}\np = Point(3)\ntry:\n    p.y = 5\nexcept Exception as e:\n    print(type(e).__name__)\nprint(len(points), asdict(p))",
+      "choices": [
+        "FrozenInstanceError\n2 {'x': 3, 'y': 0}",
+        "FrozenInstanceError\n3 {'x': 3, 'y': 0}",
+        "FrozenInstanceError\n2 (3, 0)",
+        "Point はハッシュ可能でないため、points を作る行で TypeError が発生する"
+      ],
+      "answerIndex": 0,
+      "explanation": "@dataclass(frozen=True) で、eq がデフォルトの True のままなら、インスタンスはハッシュ可能になり、set の要素にできます(TypeError にはなりません)。自動生成される __eq__ は属性の値で比較するので、Point(1, 2) が2つあっても1つにまとめられ、Point(1)(y=0)と合わせて要素数は 2 です。別々に生成したオブジェクトなので3つ残ると考えた選択肢は誤りです。frozen=True のインスタンスの属性を変更すると dataclasses.FrozenInstanceError が発生します。asdict() はインスタンスを辞書に変換するので {'x': 3, 'y': 0} です。タプルに変換するのは astuple() です。"
+    },
+    {
+      "id": "exam01-q14",
+      "chapter": 5,
+      "section": "5.1",
+      "topic": "TypedDict の total=False と Required[] で必須キーが欠けた辞書を型チェッカーが検出する",
+      "question": "次の TypedDict を定義したモジュールに、続けて代入文を1つ書いて mypy で検査します。mypy がエラーとして検出する代入文はどれですか。",
+      "code": "from typing import Required, TypedDict\n\n\nclass Movie(TypedDict, total=False):\n    title: Required[str]\n    year: int\n    rating: float",
+      "choices": [
+        "m: Movie = {\"year\": 2020, \"rating\": 4.5}",
+        "m: Movie = {\"title\": \"Arrival\"}",
+        "m: Movie = {\"title\": \"Arrival\", \"year\": 2016}",
+        "m: Movie = {\"rating\": 4.2, \"title\": \"Arrival\", \"year\": 2016}"
+      ],
+      "answerIndex": 0,
+      "explanation": "total=False を指定した TypedDict では、すべてのキーが省略可能になります。ただし Required[str] を付けた title だけは、total=False の下でも必須キーとして扱われます。title を含まない {\"year\": 2020, \"rating\": 4.5} は、必須キーが欠けているので mypy がエラーを報告します(Missing key \"title\")。title だけの辞書や、year・rating を一部または全部含む辞書は、省略可能なキーを省いているだけなので問題ありません。辞書のキーの順番も関係ありません。"
+    },
+    {
+      "id": "exam01-q15",
+      "chapter": 5,
+      "section": "5.3",
+      "topic": "assert_never は引数に型ヒントがないと型チェッカーで検出されず、実行時は AssertionError になる",
+      "question": "次のコードについて、mypy で検査した結果と、python で実行した結果の組み合わせとして正しいものはどれですか。",
+      "code": "import enum\nfrom typing import assert_never\n\n\nclass Plan(enum.Enum):\n    FREE = enum.auto()\n    PRO = enum.auto()\n    TEAM = enum.auto()\n\n\ndef monthly_fee(plan):\n    if plan == Plan.FREE:\n        return 0\n    elif plan == Plan.PRO:\n        return 1200\n    else:\n        assert_never(plan)\n\n\nprint(monthly_fee(Plan.FREE))\nprint(monthly_fee(Plan.TEAM))",
+      "choices": [
+        "mypy はエラーを検出しない。実行すると 0 を出力した後、AssertionError が発生する",
+        "mypy は Plan.TEAM の分岐漏れをエラーとして検出する。実行すると 0 を出力した後、AssertionError が発生する",
+        "mypy はエラーを検出しない。実行すると 0 と None を出力して正常に終了する",
+        "mypy は Plan.TEAM の分岐漏れをエラーとして検出する。実行すると 0 と None を出力して正常に終了する"
+      ],
+      "answerIndex": 0,
+      "explanation": "型チェッカーが assert_never() で条件の漏れを検出できるのは、引数 plan に型ヒント(plan: Plan)が書かれている場合です。このコードには型ヒントがないので、mypy はエラーを検出しません。plan: Plan と書けば、Plan.TEAM が assert_never() に渡りうることがエラーとして報告されます。一方、assert_never() は実行時に呼び出されると AssertionError を送出します。そのため Plan.FREE の 0 は出力されますが、Plan.TEAM では else 節の assert_never() が実行されて AssertionError になります。None を返して正常に終了することはありません。"
+    },
+    {
+      "id": "exam01-q16",
+      "chapter": 6,
+      "section": "6.1",
+      "topic": "rstrip(chars) は文字の集合として末尾から除去し、removesuffix は部分文字列を1回だけ除去する",
+      "question": "ファイル名のリストから拡張子 .csv を取り除こうとしています。次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "files = [\"sales.csv\", \"costs.csv\", \"data.csv.csv\"]\nprint([f.rstrip(\".csv\") for f in files])\nprint([f.removesuffix(\".csv\") for f in files])",
+      "choices": [
+        "['sale', 'cost', 'data']\n['sales', 'costs', 'data.csv']",
+        "['sales', 'costs', 'data.csv']\n['sales', 'costs', 'data.csv']",
+        "['sales', 'costs', 'data']\n['sales', 'costs', 'data.csv']",
+        "['sale', 'cost', 'data']\n['sales', 'costs', 'data']"
+      ],
+      "answerIndex": 0,
+      "explanation": "rstrip(chars) の引数は「除去する文字を並べた文字列」で、末尾から '.', 'c', 's', 'v' のどれかである限り1文字ずつ除去し続けます。そのため sales.csv は拡張子に続けて末尾の s まで除去されて 'sale' に、costs.csv は 'cost' に、data.csv.csv は 'data' になります。rstrip が \".csv\" という部分文字列を1回だけ除去すると考えた選択肢は誤りです。removesuffix(suffix) は末尾の部分文字列 suffix を1回だけ除去するので、'sales', 'costs', 'data.csv' になります。拡張子だけを取り除くには removesuffix を使います。"
+    },
+    {
+      "id": "exam01-q17",
+      "chapter": 6,
+      "section": "6.2",
+      "topic": "f-string のネストした書式指定(動的な幅)・% 変換・= によるデバッグ出力",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "rate = 0.042\nfor width in (3, 8):\n    print(f\"[{rate:>{width}.1%}]\", f\"{width=}\")",
+      "choices": [
+        "[4.2%] width=3\n[    4.2%] width=8",
+        "[4.2%] 3\n[    4.2%] 8",
+        "[4.2] width=3\n[    4.2%] width=8",
+        "[4.2%] width=3\n[4.2%    ] width=8"
+      ],
+      "answerIndex": 0,
+      "explanation": "f-string では波括弧をネストできるので、{width} が先に展開され、書式指定は >3.1% や >8.1% になります。.1% は値を100倍して小数点以下1桁の百分率にするので 4.2% になります。> は右寄せで、全体の幅に満たない部分は左側がスペースで埋められます。幅 3 は 4.2%(4文字)より短いので、そのまま 4.2% と表示されます。指定した幅で切り詰められることはありません。幅 8 では左に4つのスペースが入ります(左寄せにはなりません)。{width=} は「変数名=値」の形式で出力されるので、width=3 のようになります。"
+    },
+    {
+      "id": "exam01-q18",
+      "chapter": 6,
+      "section": "6.3",
+      "topic": "t-string の Template.strings / values と Interpolation の expression・conversion・format_spec",
+      "question": "Python 3.14 で次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "name = \"Bob\"\nn = 3\ntmpl = t\"{name} has {n * 2!r:>4} items\"\nprint(tmpl.strings, tmpl.values)\nitem = tmpl.interpolations[1]\nprint(item.expression, item.conversion, item.format_spec)",
+      "choices": [
+        "('', ' has ', ' items') ('Bob', 6)\nn * 2 r >4",
+        "(' has ', ' items') ('Bob', 6)\nn * 2 r >4",
+        "('', ' has ', ' items') ('Bob', '   6')\nn * 2 r >4",
+        "('', ' has ', ' items') ('Bob', 6)\nn * 2!r:>4 None None"
+      ],
+      "answerIndex": 0,
+      "explanation": "t-string は文字列ではなく Template オブジェクトを返し、固定の文字列部分と埋め込む値を分けて保持します。strings の要素数は必ず interpolations より1つ多く、先頭の {name} の前には文字列がないので空文字列 '' が入ります(' has ' から始まる選択肢は誤り)。values には式を評価した値がそのまま入ります。t-string では変換や書式指定が自動で適用されないので、6 は '   6' のような文字列にはなりません。Interpolation の expression には ! より前の式 'n * 2' が、conversion には ! に続く 'r' が、format_spec には : に続く '>4' が、それぞれ分けて格納されます。"
+    },
+    {
+      "id": "exam01-q19",
+      "chapter": 6,
+      "section": "6.4",
+      "topic": "re.MULTILINE の有無による ^ の挙動、re.IGNORECASE、名前付きグループの groupdict()",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import re\n\nlog = \"\"\"ERROR 10:15 disk full\ninfo 10:16 retry\nERROR 10:20 timeout\"\"\"\n\nprint(re.findall(r\"^ERROR \\S+\", log, re.M))\nprint(re.findall(r\"^error \\S+\", log, re.I))\nm = re.search(r\"(?P<h>\\d+):(?P<m>\\d+) retry\", log)\nprint(m.groupdict())",
+      "choices": [
+        "['ERROR 10:15', 'ERROR 10:20']\n['ERROR 10:15']\n{'h': '10', 'm': '16'}",
+        "['ERROR 10:15']\n['ERROR 10:15']\n{'h': '10', 'm': '16'}",
+        "['ERROR 10:15', 'ERROR 10:20']\n['ERROR 10:15', 'ERROR 10:20']\n{'h': '10', 'm': '16'}",
+        "['ERROR 10:15', 'ERROR 10:20']\n[]\n{'h': 10, 'm': 16}"
+      ],
+      "answerIndex": 0,
+      "explanation": "re.M(MULTILINE)を指定すると、^ が各行の先頭にマッチするので、1行目と3行目の ERROR の行が両方見つかります(1件だけになる選択肢は誤り)。2つ目の findall は re.I で大文字と小文字を区別しないので、error は ERROR にもマッチします(空リストにはなりません)。ただし re.M がないので、^ は文字列全体の先頭にしかマッチせず、結果は1行目の1件だけです。groupdict() は名前付きグループ (?P<名前>...) を辞書で返し、値はマッチした文字列なので '10' や '16' のような str です(int には変換されません)。"
+    },
+    {
+      "id": "exam01-q20",
+      "chapter": 8,
+      "section": "8.1",
+      "topic": "date と timedelta の加算、weekday() と isoweekday() の違い、datetime 同士の差の timedelta",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか(2025年3月1日は土曜日です)。",
+      "code": "from datetime import date, datetime, timedelta\n\nstart = date(2025, 1, 30)\ndue = start + timedelta(days=30)\nprint(due.isoformat(), due.weekday(), due.isoweekday())\n\nopened = datetime(2025, 2, 28, 18, 30)\nclosed = datetime(2025, 3, 1, 9, 0)\ndiff = closed - opened\nprint(diff, diff.days, diff.seconds)",
+      "choices": [
+        "2025-03-01 5 6\n14:30:00 0 52200",
+        "2025-03-01 6 5\n14:30:00 0 52200",
+        "2025-03-01 5 6\n1 day, 14:30:00 1 52200",
+        "2025-02-28 4 5\n14:30:00 0 52200"
+      ],
+      "answerIndex": 0,
+      "explanation": "timedelta(days=30) を加えると、月の日数を考慮して日付が進むので、2025年1月30日の30日後は 2025-03-01 です(「1か月後」のような計算ではないので 2月28日にはなりません)。weekday() は月曜を0、日曜を6とし、isoweekday() は月曜を1、日曜を7とするので、土曜日はそれぞれ 5 と 6 です。2つの値を逆にした選択肢は誤りです。datetime 同士を引き算すると timedelta が得られます。差は14時間30分で、日付をまたいでいても24時間未満なので days は 0、seconds は 14×3600+30×60=52200 です。"
+    },
+    {
+      "id": "exam01-q21",
+      "chapter": 8,
+      "section": "8.3",
+      "topic": "ZoneInfo と astimezone() によるタイムゾーン変換(夏時間を含む)と Aware/Naive の混在による TypeError",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。なお、7月のロサンゼルスは夏時間で、UTC との時差は -7 時間です。",
+      "code": "from datetime import datetime\nfrom zoneinfo import ZoneInfo\n\ntokyo = datetime(2025, 7, 1, 9, 0, tzinfo=ZoneInfo(\"Asia/Tokyo\"))\nla = tokyo.astimezone(ZoneInfo(\"America/Los_Angeles\"))\nprint(la.strftime(\"%m/%d %H:%M\"))\n\nlocal = datetime(2025, 7, 1, 9, 0)\ntry:\n    print(tokyo - local)\nexcept TypeError:\n    print(\"TypeError\")",
+      "choices": [
+        "06/30 17:00\nTypeError",
+        "06/30 16:00\nTypeError",
+        "07/01 17:00\nTypeError",
+        "06/30 17:00\n0:00:00"
+      ],
+      "answerIndex": 0,
+      "explanation": "astimezone() は、同じ時点を指定したタイムゾーンの日時に変換します。東京の 7/1 9:00(UTC+9)は UTC の 7/1 0:00 で、ロサンゼルス(夏時間の UTC-7)では前日の 6/30 17:00 になります。ZoneInfo は IANA タイムゾーンデータベースの夏時間の情報を使うので、標準時の UTC-8 で計算した 16:00 にはなりません。日付も前日に変わります。tzinfo を持つ Aware オブジェクト tokyo と、持たない Naive オブジェクト local を引き算すると TypeError が送出されます。同じ年月日時刻だからといって 0:00:00 にはなりません。"
+    },
+    {
+      "id": "exam01-q22",
+      "chapter": 9,
+      "section": "9.1",
+      "topic": "reverse=True でも保たれる安定ソートと、itemgetter に複数キーを指定した優先順位付きソート",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from operator import itemgetter\n\nrows = [(\"bob\", 80, \"B\"), (\"amy\", 90, \"A\"), (\"cat\", 80, \"A\"), (\"dan\", 90, \"B\")]\n\nby_score = sorted(rows, key=itemgetter(1), reverse=True)\nprint([r[0] for r in by_score])\n\nby_class = sorted(rows, key=itemgetter(2, 1))\nprint([r[0] for r in by_class])",
+      "choices": [
+        "['amy', 'dan', 'bob', 'cat']\n['cat', 'amy', 'bob', 'dan']",
+        "['dan', 'amy', 'cat', 'bob']\n['cat', 'amy', 'bob', 'dan']",
+        "['amy', 'dan', 'bob', 'cat']\n['amy', 'cat', 'bob', 'dan']",
+        "['dan', 'amy', 'cat', 'bob']\n['amy', 'cat', 'dan', 'bob']"
+      ],
+      "answerIndex": 0,
+      "explanation": "Python のソートは安定ソートなので、キーが同じ要素は元の順序が保たれます。reverse=True で降順にした場合も、同じ点数どうしの順序は逆になりません。90点は amy → dan、80点は bob → cat の順なので、['amy', 'dan', 'bob', 'cat'] です。リスト全体を逆順にしたような ['dan', 'amy', 'cat', 'bob'] は誤りです。itemgetter(2, 1) は (クラス, 点数) のタプルをキーにするので、まずクラスで、同じクラスの中では点数で昇順に並びます。A の cat(80)→ amy(90)、B の bob(80)→ dan(90)となり、['cat', 'amy', 'bob', 'dan'] です。"
+    },
+    {
+      "id": "exam01-q23",
+      "chapter": 9,
+      "section": "9.2",
+      "topic": "Counter の減算・和集合(|)で 0 以下のカウントが除外されること、存在しないキーの参照と total()",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from collections import Counter\n\na = Counter(\"banana\")\nb = Counter({\"a\": 1, \"n\": 5, \"x\": 2})\nprint(a - b)\nprint((a | b).most_common(2))\nprint(a[\"z\"], a.total())",
+      "choices": [
+        "Counter({'a': 2, 'b': 1})\n[('n', 5), ('a', 3)]\n0 6",
+        "Counter({'a': 2, 'b': 1, 'n': -3, 'x': -2})\n[('n', 5), ('a', 3)]\n0 6",
+        "Counter({'a': 2, 'b': 1})\n[('n', 7), ('a', 4)]\n0 6",
+        "Counter({'a': 2, 'b': 1})\n[('n', 5), ('a', 3)]\nKeyError が発生する"
+      ],
+      "answerIndex": 0,
+      "explanation": "Counter(\"banana\") は a:3, n:2, b:1 です。a - b はキーごとにカウントを引き、a:2, b:1, n:-3 となりますが、演算結果で 0 以下になったキー(n、および a にない x)は除外されます。そのため Counter({'a': 2, 'b': 1}) です。負の値が残ると考えた選択肢は誤りです。| は和集合で、キーごとに大きいほうのカウントを採用するので n:5, a:3, x:2, b:1 となり、most_common(2) は [('n', 5), ('a', 3)] です。値を足し合わせるのは + です。Counter では存在しないキーを参照すると KeyError ではなく 0 が返り、total() はカウントの合計の 6 を返します。"
+    },
+    {
+      "id": "exam01-q24",
+      "chapter": 9,
+      "section": "9.4",
+      "topic": "値が重複する列挙型メンバーのイテレーションと == 比較、異なる型との比較",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import enum\n\n\nclass Status(enum.Enum):\n    ACTIVE = 1\n    RUNNING = 1\n    STOPPED = 2\n\n\nprint([s.name for s in Status])\nprint(Status.ACTIVE == Status.RUNNING, Status.STOPPED == 2, Status[\"STOPPED\"].value)",
+      "choices": [
+        "['ACTIVE', 'STOPPED']\nTrue False 2",
+        "['ACTIVE', 'RUNNING', 'STOPPED']\nFalse False 2",
+        "['ACTIVE', 'STOPPED']\nTrue True 2",
+        "['RUNNING', 'STOPPED']\nTrue False STOPPED"
+      ],
+      "answerIndex": 0,
+      "explanation": "列挙型のイテレーターは定義順に定数を返しますが、値が重複する定数は最初の1つだけを返します。RUNNING は ACTIVE と同じ値 1 なので取得されず、['ACTIVE', 'STOPPED'] になります(3つ出る選択肢や、後に定義した RUNNING が残る選択肢は誤り)。同じ列挙型の定数どうしを == で比較すると、値が同じなら True です。一方、列挙型の定数と型が異なる int の 2 を比較すると、値が同じでも False になります。Status[\"STOPPED\"] は名前の文字列で定数を取得し、value 属性は値の 2 です。"
+    },
+    {
+      "id": "exam01-q25",
+      "chapter": 9,
+      "section": "9.6",
+      "topic": "ソートしていないデータへの groupby が連続した値だけをまとめることと zip_longest の fillvalue",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from itertools import groupby, zip_longest\n\ndata = \"aabccba\"\nprint([(k, len(list(g))) for k, g in groupby(data)])\nprint(list(zip_longest(\"ab\", [1, 2, 3], fillvalue=\"-\")))",
+      "choices": [
+        "[('a', 2), ('b', 1), ('c', 2), ('b', 1), ('a', 1)]\n[('a', 1), ('b', 2), ('-', 3)]",
+        "[('a', 3), ('b', 2), ('c', 2)]\n[('a', 1), ('b', 2), ('-', 3)]",
+        "[('a', 2), ('b', 1), ('c', 2), ('b', 1), ('a', 1)]\n[('a', 1), ('b', 2)]",
+        "[('a', 3), ('b', 2), ('c', 2)]\n[('a', 1), ('b', 2), (None, 3)]"
+      ],
+      "answerIndex": 0,
+      "explanation": "groupby() は、同じ値が連続している部分ごとにグループを作ります。data はソートされていないので、a が2個、b が1個、c が2個、b が1個、a が1個と、5つのグループに分かれます。値ごとに全体の個数をまとめたいなら、事前に sorted() でソートしておく必要があります。zip_longest() は最も長いイテラブルに長さを合わせ、足りない要素を fillvalue で埋めるので、3組目は ('-', 3) です。最短に合わせて2組になるのは組み込みの zip() の動作です。fillvalue を指定しているので None にはなりません。"
+    },
+    {
+      "id": "exam01-q26",
+      "chapter": 9,
+      "section": "9.7",
+      "topic": "copy.copy(浅いコピー)では入れ子のリストが共有され、deepcopy では共有されないこと",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import copy\n\nconfig = {\"name\": \"app\", \"ports\": [80, 443]}\nshallow = copy.copy(config)\ndeep = copy.deepcopy(config)\n\nshallow[\"name\"] = \"web\"\nshallow[\"ports\"].append(8080)\ndeep[\"ports\"].append(9000)\nprint(config)",
+      "choices": [
+        "{'name': 'app', 'ports': [80, 443, 8080]}",
+        "{'name': 'web', 'ports': [80, 443, 8080]}",
+        "{'name': 'app', 'ports': [80, 443]}",
+        "{'name': 'app', 'ports': [80, 443, 8080, 9000]}"
+      ],
+      "answerIndex": 0,
+      "explanation": "copy.copy() の浅いコピーでは、1階層目の辞書だけが新しく作られます。そのため shallow[\"name\"] にほかの値を代入しても config には影響しません(name が web になる選択肢は誤り)。一方、値として入っているリスト ports は、config と shallow で同じオブジェクトを参照しているので、shallow 経由の append(8080) は config にも反映されます。copy.deepcopy() は子オブジェクトも再帰的にコピーするので、deep のリストへの append(9000) は config に影響しません。"
+    },
+    {
+      "id": "exam01-q27",
+      "chapter": 10,
+      "section": "10.2",
+      "topic": "StringIO で書き込み後に seek(0) せずに read() すると空になること、tell() と getvalue()",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import io\n\nstream = io.StringIO()\nstream.write(\"alpha\\n\")\nstream.write(\"beta\\n\")\nprint(repr(stream.read()), stream.tell())\nstream.seek(0)\nprint(repr(stream.read(5)), repr(stream.getvalue()))",
+      "choices": [
+        "'' 11\n'alpha' 'alpha\\nbeta\\n'",
+        "'alpha\\nbeta\\n' 11\n'alpha' 'alpha\\nbeta\\n'",
+        "'' 11\n'alpha' '\\nbeta\\n'",
+        "'' 0\n'alpha' 'alpha\\nbeta\\n'"
+      ],
+      "answerIndex": 0,
+      "explanation": "StringIO もファイルと同じく現在のオフセット(読み書きの位置)を持ちます。2回の write() の後、オフセットは書き込んだ末尾の 11(6文字 + 5文字)にあるので、そのまま read() すると空文字列 '' が返り、tell() は 11 です。書き込んだ内容を読み込むには、先に seek(0) でオフセットを先頭に戻す必要があります。seek(0) の後の read(5) は先頭から5文字の 'alpha' を返します。getvalue() は現在のオフセットに関係なく、ストリームが保持するすべての内容を返すので 'alpha\\nbeta\\n' です。"
+    },
+    {
+      "id": "exam01-q28",
+      "chapter": 10,
+      "section": "10.4",
+      "topic": "argparse で type を指定しない引数は str のままになることと default・choices の動作",
+      "question": "次のスクリプト conv.py をシェルから `python conv.py --size 10 -r 3` として実行しました。出力として正しいものはどれですか。",
+      "code": "import argparse\n\nparser = argparse.ArgumentParser(description=\"converter\")\nparser.add_argument(\"-s\", \"--size\", type=int, required=True)\nparser.add_argument(\"-u\", \"--unit\", choices=[\"kb\", \"mb\"], default=\"kb\")\nparser.add_argument(\"-r\", \"--repeat\", default=2)\nargs = parser.parse_args()\nprint(args.size * 2, args.unit, args.repeat * 2)",
+      "choices": [
+        "20 kb 33",
+        "20 kb 6",
+        "1010 kb 33",
+        "20 None 6"
+      ],
+      "answerIndex": 0,
+      "explanation": "--size は type=int を指定しているので、渡された '10' は int の 10 に変換され、2倍すると 20 です(type を指定しない場合は str のままになり、'1010' のようになります)。--unit は省略されたので default の 'kb' が使われます。choices は指定できる値を制限するもので、省略時の値には影響しません。--repeat には type がないため、コマンドラインから渡された '3' は str のままで、'3' * 2 は文字列の繰り返し '33' になります。default=2 が int であっても、コマンドラインで値を渡した場合の型変換は行われません。"
+    },
+    {
+      "id": "exam01-q29",
+      "chapter": 11,
+      "section": "11.1",
+      "topic": "PurePosixPath の stem・suffix・suffixes・parents[n]・with_suffix() の結果",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from pathlib import PurePosixPath\n\np = PurePosixPath(\"/srv/app/backup.2025.tar.gz\")\nprint(p.stem, p.suffix, p.suffixes)\nprint(p.parents[1], p.with_suffix(\".zip\").name)",
+      "choices": [
+        "backup.2025.tar .gz ['.2025', '.tar', '.gz']\n/srv backup.2025.tar.zip",
+        "backup .gz ['.2025', '.tar', '.gz']\n/srv backup.zip",
+        "backup.2025.tar .gz ['.tar', '.gz']\n/srv/app backup.2025.tar.zip",
+        "backup.2025.tar .tar.gz ['.2025', '.tar', '.gz']\n/srv backup.2025.zip"
+      ],
+      "answerIndex": 0,
+      "explanation": "suffix は末尾の要素の最後の拡張子だけを返すので '.gz' です('.tar.gz' にはなりません)。stem は末尾の要素から最後の拡張子だけを除いたものなので 'backup.2025.tar' です。suffixes はドットで区切られた拡張子をすべてリストで返すので、'.2025' も含めて ['.2025', '.tar', '.gz'] になります。parents は近い上位パスから順に並ぶシーケンスで、parents[0] が /srv/app、parents[1] が /srv です。with_suffix() は最後の拡張子だけを置き換えるので、name は 'backup.2025.tar.zip' になります。"
+    },
+    {
+      "id": "exam01-q30",
+      "chapter": 11,
+      "section": "11.3",
+      "topic": "copytree で ignore_patterns() により除外し、dirs_exist_ok=True で既存のコピー先にコピーする書き方",
+      "question": "src ディレクトリを中身ごと backup ディレクトリにコピーします。拡張子 .pyc のファイルと __pycache__ ディレクトリはコピーせず、backup ディレクトリがすでに存在していてもエラーにしたくありません。この目的を満たすコードはどれですか(import shutil は済んでいるものとします)。",
+      "code": null,
+      "choices": [
+        "shutil.copytree(\"src\", \"backup\", ignore=shutil.ignore_patterns(\"*.pyc\", \"__pycache__\"), dirs_exist_ok=True)",
+        "shutil.copytree(\"src\", \"backup\", ignore=[\"*.pyc\", \"__pycache__\"], dirs_exist_ok=True)",
+        "shutil.copytree(\"src\", \"backup\", ignore=shutil.ignore_patterns(\"*.pyc\", \"__pycache__\"))",
+        "shutil.copytree(\"src\", \"backup\", ignore=shutil.ignore_patterns(\"*.pyc\", \"__pycache__\"), symlinks=True)"
+      ],
+      "answerIndex": 0,
+      "explanation": "copytree() の ignore 引数には、コピー対象外のファイルを決める「関数」を指定します。shutil.ignore_patterns() は、指定したパターンにマッチする名前を除外する関数を返します。パターンのリストを直接渡すと、呼び出せないオブジェクトとして扱われ TypeError になります。また、コピー先のディレクトリがすでに存在するとエラー(FileExistsError)になるので、それを避けるには dirs_exist_ok=True を指定します。dirs_exist_ok を指定しない2つの選択肢は、backup が存在するとエラーになります。symlinks=True はシンボリックリンクをリンクのままコピーする指定で、既存ディレクトリのエラーとは関係ありません。"
+    },
+    {
+      "id": "exam01-q31",
+      "chapter": 13,
+      "section": "13.1",
+      "topic": "DictWriter の fieldnames による列順、restval による補完、extrasaction='ignore'、区切り文字を含む値の引用符",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import csv\nimport io\n\nbuf = io.StringIO()\nwriter = csv.DictWriter(\n    buf,\n    fieldnames=[\"id\", \"name\", \"city\"],\n    restval=\"-\",\n    extrasaction=\"ignore\",\n    lineterminator=\"\\n\",\n)\nwriter.writeheader()\nwriter.writerow({\"name\": \"ann\", \"id\": 1, \"age\": 30})\nwriter.writerow({\"id\": 2, \"city\": \"Osaka, JP\"})\nprint(buf.getvalue(), end=\"\")",
+      "choices": [
+        "id,name,city\n1,ann,-\n2,-,\"Osaka, JP\"",
+        "id,name,city\n1,ann,-,30\n2,-,\"Osaka, JP\"",
+        "id,name,city\nann,1,-\n2,-,\"Osaka, JP\"",
+        "id,name,city\n1,ann,\n2,,Osaka, JP"
+      ],
+      "answerIndex": 0,
+      "explanation": "DictWriter は、辞書のキーの順番ではなく fieldnames の順番(id, name, city)で値を書き込みます(ann,1 の順になる選択肢は誤り)。辞書に fieldnames のキーがない場合は restval に指定した '-' で補完されます(空欄になる選択肢は誤り)。fieldnames にないキー age は、extrasaction='ignore' なので無視されて書き込まれません。'raise' であれば ValueError になります。値 \"Osaka, JP\" は区切り文字のカンマを含むので、quotechar のダブルクォートで囲んで書き込まれます。"
+    },
+    {
+      "id": "exam01-q32",
+      "chapter": 13,
+      "section": "13.2",
+      "topic": "json.dumps の default 引数・sort_keys と、loads で戻したときにタプルや日付が元の型に戻らないこと",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import json\nfrom datetime import date\n\ndata = {\"id\": 7, \"tags\": (\"a\", \"b\"), \"ok\": None, \"day\": date(2025, 4, 1)}\ntext = json.dumps(data, default=lambda o: o.isoformat(), sort_keys=True)\nprint(text)\nback = json.loads(text)\nprint(back == data, type(back[\"tags\"]).__name__)",
+      "choices": [
+        "{\"day\": \"2025-04-01\", \"id\": 7, \"ok\": null, \"tags\": [\"a\", \"b\"]}\nFalse list",
+        "{\"day\": \"2025-04-01\", \"id\": 7, \"ok\": null, \"tags\": [\"a\", \"b\"]}\nTrue tuple",
+        "{\"id\": 7, \"tags\": [\"a\", \"b\"], \"ok\": null, \"day\": \"2025-04-01\"}\nFalse list",
+        "{\"day\": \"2025-04-01\", \"id\": 7, \"ok\": None, \"tags\": (\"a\", \"b\")}\nTrue tuple"
+      ],
+      "answerIndex": 0,
+      "explanation": "date 型はそのままでは JSON に変換できず TypeError になりますが、default 引数に指定した関数がシリアライズできないオブジェクトに適用されるので、ISO 形式の文字列 \"2025-04-01\" になります。sort_keys=True なのでキーはソートされて day, id, ok, tags の順になります(元の順の選択肢は誤り)。タプルは JSON の配列 [\"a\", \"b\"] に、None は null に変換されます。loads で戻すと配列はリストになり、日付は文字列のままです。そのため元の data とは等しくならず(False)、tags の型は list です。"
+    },
+    {
+      "id": "exam01-q33",
+      "chapter": 14,
+      "section": "14.1",
+      "topic": "urljoin でベース URL 末尾のスラッシュの有無により結合結果が変わることと parse_qs の空値・複数値",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "from urllib.parse import parse_qs, urljoin\n\nprint(urljoin(\"https://example.com/api/v1\", \"users\"))\nprint(urljoin(\"https://example.com/api/v1/\", \"users\"))\nprint(parse_qs(\"tag=a&tag=b&page=&q=x\"))",
+      "choices": [
+        "https://example.com/api/users\nhttps://example.com/api/v1/users\n{'tag': ['a', 'b'], 'q': ['x']}",
+        "https://example.com/api/v1/users\nhttps://example.com/api/v1/users\n{'tag': ['a', 'b'], 'q': ['x']}",
+        "https://example.com/api/users\nhttps://example.com/api/v1/users\n{'tag': 'b', 'page': '', 'q': 'x'}",
+        "https://example.com/users\nhttps://example.com/api/v1/users\n{'tag': ['a', 'b'], 'page': [''], 'q': ['x']}"
+      ],
+      "answerIndex": 0,
+      "explanation": "urljoin() はベース URL の末尾にスラッシュを自動で付けません。末尾にスラッシュがない https://example.com/api/v1 では、最後の v1 がファイル名とみなされて users に置き換わり、https://example.com/api/users になります。末尾にスラッシュがあれば v1 の下に結合されます。parse_qs() の値は常にリストなので、同じキー tag が複数あれば ['a', 'b'] のようにまとめられます(最後の値だけを文字列で返す選択肢は誤り)。また、デフォルトの keep_blank_values=False では、page= のように値が空のパラメーターは結果に含まれません。"
+    },
+    {
+      "id": "exam01-q34",
+      "chapter": 14,
+      "section": "14.2",
+      "topic": "urllib.request で任意の HTTP メソッド(DELETE)とヘッダーを指定するには Request の method/headers を使う",
+      "question": "変数 url が指す Web API に、変数 headers の辞書(Authorization ヘッダー)を付けて DELETE メソッドのリクエストを送りたいと考えています。目的を満たすコードはどれですか(Request と urlopen は urllib.request からインポート済みです)。",
+      "code": null,
+      "choices": [
+        "req = Request(url, headers=headers, method=\"DELETE\")\nwith urlopen(req) as res:\n    body = res.read()",
+        "with urlopen(url, headers=headers, method=\"DELETE\") as res:\n    body = res.read()",
+        "req = Request(url, data=b\"\", headers=headers)\nwith urlopen(req) as res:\n    body = res.read()",
+        "req = Request(url, headers=headers)\nwith urlopen(req, data=b\"DELETE\") as res:\n    body = res.read()"
+      ],
+      "answerIndex": 0,
+      "explanation": "urlopen() 自体には HTTP メソッドやヘッダーを指定する引数がありません。任意の HTTP メソッドを使うには Request クラスの method 引数に文字列を、ヘッダーを付けるには headers 引数に辞書を指定し、その Request オブジェクトを urlopen() に渡します。urlopen() に headers や method を直接渡すと TypeError になります。Request や urlopen() の data 引数にバイト列を渡すと、POST メソッドのリクエストとして送信されます。data=b\"DELETE\" のように内容を DELETE にしても、メソッドは DELETE にはなりません。"
+    },
+    {
+      "id": "exam01-q35",
+      "chapter": 16,
+      "section": "16.1",
+      "topic": "doctest は期待出力と実際の出力の厳密な一致で判定する(3 と 3.0、例外のトレースバック省略)",
+      "question": "次のモジュール stats.py に対して `python -m doctest stats.py` を実行しました。docstring に書かれた4つのテスト例のうち、失敗と判定されるものはどれですか。",
+      "code": "def average(values):\n    \"\"\"数値のリストの平均を返す.\n\n    >>> average([1, 2, 3])\n    2.0\n    >>> average([2, 4])\n    3\n    >>> average([])\n    Traceback (most recent call last):\n        ...\n    ZeroDivisionError: division by zero\n    >>> round(average([1, 2]), 1)\n    1.5\n    \"\"\"\n    return sum(values) / len(values)",
+      "choices": [
+        "average([2, 4]) の結果を 3 と期待している例",
+        "average([1, 2, 3]) の結果を 2.0 と期待している例",
+        "average([]) で ZeroDivisionError が送出されることを期待している例",
+        "round(average([1, 2]), 1) の結果を 1.5 と期待している例"
+      ],
+      "answerIndex": 0,
+      "explanation": "doctest は、>>> の行を実行した出力と、その直下に書かれた期待出力が1文字単位で厳密に一致するかで判定します。/ による除算の結果は float なので、average([2, 4]) の出力は 3.0 です。値としては 3 と等しくても文字列が一致しないので失敗します。average([1, 2, 3]) は 2.0、round(average([1, 2]), 1) は 1.5 を出力するので成功します。例外のテストは「Traceback (most recent call last):」の行から書き始め、途中のスタック情報は ... で省略できるので、ZeroDivisionError: division by zero が一致すれば成功します。"
+    },
+    {
+      "id": "exam01-q36",
+      "chapter": 16,
+      "section": "16.2",
+      "topic": "setUpClass/setUp/tearDown/tearDownClass の呼ばれ方(失敗したテストでも tearDown が呼ばれ、test で始まらないメソッドは実行されない)",
+      "question": "次のテストモジュール test_calc.py を `python -m unittest test_calc` で実行しました。標準出力に出力される内容として正しいものはどれですか。なお、テストメソッドはメソッド名の順に実行されます。",
+      "code": "import unittest\n\n\nclass TestCalc(unittest.TestCase):\n    @classmethod\n    def setUpClass(cls):\n        print(\"C\", end=\" \")\n\n    @classmethod\n    def tearDownClass(cls):\n        print(\"D\", end=\" \")\n\n    def setUp(self):\n        print(\"s\", end=\" \")\n\n    def tearDown(self):\n        print(\"t\", end=\" \")\n\n    def test_add(self):\n        print(\"a\", end=\" \")\n        self.assertEqual(1 + 1, 3)\n\n    def test_sub(self):\n        print(\"b\", end=\" \")\n\n    def check_mul(self):\n        print(\"m\", end=\" \")",
+      "choices": [
+        "C s a t s b t D",
+        "C s a s b t D",
+        "C s a t s b t s m t D",
+        "C s a t D"
+      ],
+      "answerIndex": 0,
+      "explanation": "setUpClass() と tearDownClass() はクラス内のテストの前後に1回ずつ、setUp() と tearDown() は各テストメソッドの直前と直後に呼ばれます。tearDown() は、テストの結果にかかわらず setUp() が成功していれば呼ばれます。そのため、assertEqual が失敗する test_add の後にも t が出力されます(t が出力されない選択肢は誤り)。テストが1つ失敗しても、残りのテスト test_sub は実行されます。失敗した時点で止まるのは -f(--failfast)オプションを指定した場合です。check_mul はメソッド名が test で始まらないので、テストとして実行されません。"
+    },
+    {
+      "id": "exam01-q37",
+      "chapter": 16,
+      "section": "16.3",
+      "topic": "patch デコレーターを重ねたときのモック引数の順序(逆順)と、side_effect が return_value より優先されること",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import os\nfrom unittest.mock import patch\n\n\ndef describe():\n    return f\"{os.getcwd()}|{os.cpu_count()}\"\n\n\n@patch(\"os.cpu_count\")\n@patch(\"os.getcwd\")\ndef run(mock_a, mock_b):\n    mock_a.return_value = \"/work\"\n    mock_b.return_value = 4\n    mock_b.side_effect = lambda: 8\n    print(describe(), describe())\n    print(mock_b.call_count)\n\n\nrun()",
+      "choices": [
+        "/work|8 /work|8\n2",
+        "8|/work 8|/work\n2",
+        "/work|4 /work|4\n2",
+        "/work|4 /work|8\n2"
+      ],
+      "answerIndex": 0,
+      "explanation": "patch をデコレーターとして重ねると、関数に近い(下にある)デコレーターのモックから順に引数に渡されます。つまり、適用した順序の逆順です。そのため mock_a は os.getcwd、mock_b は os.cpu_count のモックです。上から順に渡ると考えると「8|/work」の選択肢を選んでしまいます。side_effect に呼び出し可能オブジェクトを指定すると、モックを呼び出したときにその処理が実行され、戻り値は return_value より優先されます。そのため os.cpu_count() は2回とも 8 を返し、呼び出し回数 call_count は 2 です。"
+    },
+    {
+      "id": "exam01-q38",
+      "chapter": 17,
+      "section": "17.2",
+      "topic": "自作関数を timeit で計測するときの globals 引数と、timeit() と repeat() の戻り値の違い",
+      "question": "スクリプト内で定義した関数 make_table() の実行時間を計測します。「1000回実行した合計時間」を5回計測し、5つの計測結果をリストで受け取りたいと考えています。目的を満たすコードはどれですか(import timeit は済んでいるものとします)。",
+      "code": "import timeit\n\n\ndef make_table():\n    return [i * i for i in range(100)]",
+      "choices": [
+        "results = timeit.repeat(\"make_table()\", globals=globals(), repeat=5, number=1000)",
+        "results = timeit.repeat(\"make_table()\", repeat=5, number=1000)",
+        "results = timeit.timeit(\"make_table()\", globals=globals(), number=5000)",
+        "results = timeit.repeat(\"make_table()\", setup=\"make_table\", repeat=5, number=1000)"
+      ],
+      "answerIndex": 0,
+      "explanation": "timeit は、デフォルト(globals=None)では timeit モジュールの名前空間でコードを実行します。そのため、スクリプトで定義した make_table は見つからず NameError になります。自作の関数を計測するには globals=globals() を指定して、現在の名前空間を渡します。setup に関数名を書いても、同じ名前空間で実行されるので NameError になります。repeat() は number 回の実行を repeat 回繰り返し、結果をリストで返します。timeit() は number 回実行した合計時間を float で1つ返すだけなので、5000 回にしてもリストにはなりません。"
+    },
+    {
+      "id": "exam01-q39",
+      "chapter": 17,
+      "section": "17.4",
+      "topic": "ロガーのレベル設定によるしきい値と、子ロガーから親(ルート)のハンドラーへの伝播",
+      "question": "次のコードを実行したとき、標準出力に出力される内容として正しいものはどれですか。",
+      "code": "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO,\n                    format=\"%(name)s:%(levelname)s:%(message)s\")\napp = logging.getLogger(\"app\")\ndb = logging.getLogger(\"app.db\")\ndb.setLevel(logging.WARNING)\n\napp.debug(\"start\")\napp.info(\"ready %s\", 3)\ndb.info(\"connected\")\ndb.error(\"lost\")",
+      "choices": [
+        "app:INFO:ready 3\napp.db:ERROR:lost",
+        "app:INFO:ready 3\napp.db:INFO:connected\napp.db:ERROR:lost",
+        "app:DEBUG:start\napp:INFO:ready 3\napp.db:ERROR:lost",
+        "app:INFO:ready %s 3\napp.db:ERROR:lost"
+      ],
+      "answerIndex": 0,
+      "explanation": "basicConfig(level=logging.INFO) によって、ルートロガーには INFO 以上を標準出力に出力するハンドラーが設定されます。ロガー app と app.db は自分のハンドラーを持ちませんが、メッセージは親ロガーへ伝播し、ルートのハンドラーで出力されます。app にはレベルが設定されていないので、ルートの INFO がしきい値になり、DEBUG の start は出力されません。app.db には setLevel(logging.WARNING) を設定しているので、INFO の connected は出力されず、ERROR の lost だけが出力されます。メッセージの %s には後ろの引数 3 が埋め込まれます。"
+    },
+    {
+      "id": "exam01-q40",
+      "chapter": 18,
+      "section": "18.2",
+      "topic": "hashlib の update() を分けて呼んだ結果と一括の結果の一致、digest()/hexdigest() の長さ、str を渡したときの TypeError",
+      "question": "次のコードを実行したときの出力として正しいものはどれですか。",
+      "code": "import hashlib\n\nh1 = hashlib.sha256()\nh1.update(b\"abc\")\nh1.update(b\"def\")\nh2 = hashlib.sha256(b\"abcdef\")\nprint(h1.hexdigest() == h2.hexdigest(), len(h1.digest()), len(h1.hexdigest()))\n\ntry:\n    hashlib.sha256(\"abc\")\nexcept TypeError:\n    print(\"TypeError\")",
+      "choices": [
+        "True 32 64\nTypeError",
+        "False 32 64\nTypeError",
+        "True 64 32\nTypeError",
+        "True 32 64"
+      ],
+      "answerIndex": 0,
+      "explanation": "update() はハッシュオブジェクトにデータを追加するので、b\"abc\" と b\"def\" を順に渡した結果は、b\"abcdef\" をまとめて渡した場合と同じハッシュ値になります(update() で値が置き換わると考えた False の選択肢は誤り)。SHA-256 のダイジェスト長は 32 バイトです。digest() はバイト列なので長さは 32、hexdigest() は1バイトを16進数2文字で表した文字列なので長さは 64 です(逆にした選択肢は誤り)。ハッシュ計算は str 型をサポートしていないので、文字列 \"abc\" を渡すと TypeError が発生します。bytes に変換してから渡す必要があります。"
+    }
+  ]
+}

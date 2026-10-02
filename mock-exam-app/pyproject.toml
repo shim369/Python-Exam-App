@@ -1,0 +1,19 @@
+[project]
+name = "mock-exam-app"
+version = "0.1.0"
+description = "Python 3 エンジニア認定実践試験の模擬試験アプリ (Streamlit)"
+requires-python = ">=3.14"
+dependencies = [
+    "streamlit==1.64.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
