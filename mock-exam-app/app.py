@@ -108,7 +108,73 @@ def grade() -> dict:
         "total": len(qs),
         "byChapter": by_chapter,
         "timedOut": st.session_state.timed_out,
+        # 結果画面を後から開き直せるよう、問題ごとの解答と選択肢の並び順も保存する
+        "answers": [
+            {"id": q["id"], "answer": a, "order": order}
+            for q, a, order in zip(qs, answers, st.session_state.orders)
+        ],
     }
+
+
+def open_record(record: dict, exams_by_key: dict[str, dict]) -> None:
+    """受験履歴の記録から結果画面を復元する. 問題本文は exams/ の JSON から id で引く."""
+    exam = exams_by_key.get(record.get("exam"), {"questions": []})
+    by_id = {q["id"]: q for q in exam["questions"]}
+    questions, answers, orders = [], [], []
+    for item in record.get("answers") or []:
+        q = by_id.get(item.get("id"))
+        if q is None:
+            continue
+        n = len(q["choices"])
+        order = item.get("order")
+        if not order or sorted(order) != list(range(n)):
+            order = list(range(n))
+        questions.append(q)
+        answers.append(item.get("answer"))
+        orders.append(order)
+    st.session_state.update(
+        screen="result",
+        record=record,
+        exam_title=record.get("title", record.get("exam")),
+        questions=questions,
+        answers=answers,
+        orders=orders,
+    )
+
+
+def start_review() -> None:
+    """結果画面で表示中の受験記録のうち、間違えた (未解答を含む) 問題だけを解き直す."""
+    qs = [q for q, a in zip(st.session_state.questions, st.session_state.answers) if a != q["answerIndex"]]
+    st.session_state.update(
+        screen="review",
+        review_questions=qs,
+        review_orders=[random.sample(range(len(q["choices"])), len(q["choices"])) for q in qs],
+        review_answers=[None] * len(qs),
+        review_checked=[False] * len(qs),
+        review_current=0,
+        review_attempt=uuid.uuid4().hex[:8],
+    )
+
+
+def review_key(i: int) -> str:
+    return f"rev_{st.session_state.review_attempt}_{i}"
+
+
+def save_review_answer() -> None:
+    i = st.session_state.review_current
+    pos = st.session_state.get(review_key(i))
+    if pos is not None:
+        st.session_state.review_answers[i] = st.session_state.review_orders[i][pos]
+
+
+def review_go(delta: int) -> None:
+    save_review_answer()
+    st.session_state.review_current += delta
+
+
+def check_review() -> None:
+    save_review_answer()
+    st.session_state.review_checked[st.session_state.review_current] = True
 
 
 def remaining_sec() -> float:
@@ -124,7 +190,8 @@ def render_start() -> None:
     if not exams:
         st.warning("exams/ に問題ファイル (exam-XX.json) がありません。")
         return
-    latest = last_results(load_history())
+    history = load_history()
+    latest = last_results(history)
 
     def label(exam: dict) -> str:
         rec = latest.get(exam["key"])
@@ -148,6 +215,24 @@ def render_start() -> None:
     idx = st.selectbox("受験する回", range(len(exams)), format_func=lambda i: label(exams[i]), key="exam_select")
     st.button("試験を開始する", type="primary", on_click=start_exam, args=(exams[idx],))
 
+    if history:
+        st.subheader("受験履歴")
+        exams_by_key = {e["key"]: e for e in exams}
+
+        def history_label(j: int) -> str:
+            rec = history[j]
+            note = "" if rec.get("answers") else "（解答の詳細なし）"
+            when = rec.get("datetime", "").replace("T", " ")
+            return f"{when}　{rec.get('title', rec.get('exam'))}　{rec['correct']}/{rec['total']}{note}"
+
+        j = st.selectbox(
+            "振り返る記録（新しい順）",
+            range(len(history) - 1, -1, -1),
+            format_func=history_label,
+            key="history_select",
+        )
+        st.button("結果を見る", on_click=open_record, args=(history[j], exams_by_key))
+
 
 @st.fragment(run_every=1)
 def render_timer() -> None:
@@ -162,11 +247,9 @@ def render_timer() -> None:
     st.markdown(f"⏱ 残り時間 **:{color}[{m:02d}:{s:02d}]**")
 
 
-def render_choices(q: dict, order: list[int], i: int) -> None:
+def render_choices(q: dict, order: list[int], key: str, current: int | None, on_change, disabled: bool = False) -> None:
     shown = [q["choices"][k] for k in order]
-    current = st.session_state.answers[i]
     index = order.index(current) if current is not None else None
-    key = radio_key(i)
     # ウィジェットが一度消えた後 (前へ/次へ) でも保存済みの解答を復元する
     if key not in st.session_state:
         st.session_state[key] = index
@@ -180,7 +263,15 @@ def render_choices(q: dict, order: list[int], i: int) -> None:
     else:
         fmt = lambda pos: f"{LETTERS[pos]}. {md_escape(shown[pos])}"  # noqa: E731
         horizontal = False
-    st.radio("解答を選択", range(len(shown)), format_func=fmt, key=key, horizontal=horizontal, on_change=save_current_answer)
+    st.radio(
+        "解答を選択",
+        range(len(shown)),
+        format_func=fmt,
+        key=key,
+        horizontal=horizontal,
+        on_change=on_change,
+        disabled=disabled,
+    )
 
 
 def render_exam() -> None:
@@ -205,7 +296,7 @@ def render_exam() -> None:
     st.markdown(q["question"])
     if q.get("code"):
         st.code(q["code"], language="python")
-    render_choices(q, st.session_state.orders[i], i)
+    render_choices(q, st.session_state.orders[i], radio_key(i), st.session_state.answers[i], save_current_answer)
 
     st.divider()
     c1, c2, c3 = st.columns(3)
@@ -252,6 +343,17 @@ def render_result() -> None:
     )
 
     st.subheader("全問の一覧")
+    if not qs:
+        st.info("この記録には問題ごとの解答が保存されていません（機能追加前の記録、または問題ファイルが見つかりません）。")
+        st.button("開始画面に戻る", on_click=lambda: st.session_state.update(screen="start"))
+        return
+    n_wrong = sum(a != q["answerIndex"] for q, a in zip(qs, answers))
+    st.button(
+        f"間違えた問題を解き直す（{n_wrong}問）",
+        type="primary",
+        disabled=n_wrong == 0,
+        on_click=start_review,
+    )
     only_wrong = st.toggle("間違えた問題だけ表示する", key="only_wrong")
     shown = 0
     for i, (q, a, order) in enumerate(zip(qs, answers, orders)):
@@ -282,6 +384,50 @@ def render_result() -> None:
     st.button("開始画面に戻る", on_click=lambda: st.session_state.update(screen="start"))
 
 
+def render_review() -> None:
+    qs = st.session_state.review_questions
+    i = st.session_state.review_current
+    q = qs[i]
+    n = len(qs)
+    order = st.session_state.review_orders[i]
+    checked = st.session_state.review_checked
+    answer = st.session_state.review_answers[i]
+
+    st.subheader(f"復習：{st.session_state.exam_title} の間違えた問題")
+    n_checked = sum(checked)
+    n_ok = sum(c and a == rq["answerIndex"] for rq, a, c in zip(qs, st.session_state.review_answers, checked))
+    st.markdown(f"**問題 {i + 1} / {n}**　（答え合わせ済み {n_checked}・正解 {n_ok}）")
+    st.progress((i + 1) / n)
+
+    st.caption(f"{chapter_label(q['chapter'])} / {q['section']}")
+    st.markdown(q["question"])
+    if q.get("code"):
+        st.code(q["code"], language="python")
+    render_choices(q, order, review_key(i), answer, save_review_answer, disabled=checked[i])
+
+    if checked[i]:
+        correct = LETTERS[order.index(q["answerIndex"])]
+        if answer == q["answerIndex"]:
+            st.success(f"正解です（正解: {correct}）")
+        else:
+            st.error(f"不正解です（正解: {correct}）")
+        st.info(q["explanation"])
+    else:
+        st.button("答え合わせ", type="primary", disabled=answer is None, on_click=check_review)
+
+    if n_checked == n:
+        st.success(f"復習完了：{n} 問中 {n_ok} 問正解しました。")
+
+    st.divider()
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.button("← 前へ", disabled=i == 0, on_click=review_go, args=(-1,), width="stretch")
+    with c2:
+        st.button("結果画面に戻る", on_click=lambda: st.session_state.update(screen="result"), width="stretch")
+    with c3:
+        st.button("次へ →", disabled=i == n - 1, on_click=review_go, args=(1,), width="stretch")
+
+
 # ---------------------------------------------------------------- main
 init_state()
-{"start": render_start, "exam": render_exam, "result": render_result}[st.session_state.screen]()
+{"start": render_start, "exam": render_exam, "result": render_result, "review": render_review}[st.session_state.screen]()
