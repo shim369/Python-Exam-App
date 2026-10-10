@@ -33,7 +33,7 @@ def norm_choice(text: str) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--textbook", type=Path, default=APP_DIR.parent / "textbook", help="章.節フォルダがある教科書ディレクトリ")
+    ap.add_argument("--textbook", type=Path, default=APP_DIR / "textbook", help="章.節フォルダがある教科書ディレクトリ")
     args = ap.parse_args()
 
     textbook_sections = {p.name for p in args.textbook.iterdir() if p.is_dir() and re.fullmatch(r"\d+\.\d+", p.name)}

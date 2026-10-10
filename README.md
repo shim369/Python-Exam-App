@@ -11,7 +11,7 @@ Streamlit で動く、Python 3 エンジニア認定実践試験の模擬試験�
 ## セットアップ
 
 ```bash
-cd mock-exam-app
+cd Python-Exam-App
 uv sync
 ```
 
@@ -42,28 +42,26 @@ uv run streamlit run app.py
 ## ディレクトリ構成
 
 ```
-exam3/
+Python-Exam-App/
 ├── .claude/commands/new-exam.md  # /new-exam コマンド (次の回を作る手順)
-├── .gitignore                    # textbook/ と .DS_Store を除外
+├── .gitignore                    # textbook/ や .venv/、results/ などを除外
+├── .streamlit/config.toml        # テーマ設定 (ダークモード、見出しのフォントサイズ)
+├── app.py                        # アプリ本体 (開始画面 → 出題画面 → 結果画面)
+├── exam_core.py                  # 章ごとの出題数などの定数、問題・履歴の読み書き
+├── exams/
+│   └── exam-01.json              # 問題データ (1回分 = 1ファイル)
+├── results/history.json          # 受験履歴 (受験すると作成される)
+├── scripts/validate_exams.py     # 問題データの検証スクリプト
+├── tests/                        # AppTest によるアプリのテスト
 ├── textbook/                     # 教科書のテキスト (git の管理対象外)
 │   ├── 1.1/                      #   「章.節」フォルダ。中の 1_1_1.txt などが本文
 │   └── ...                       #   1.1 〜 18.2
-└── mock-exam-app/
-    ├── .gitignore                # .venv/ や results/ などを除外
-    ├── .streamlit/config.toml    # テーマ設定 (ダークモード、見出しのフォントサイズ)
-    ├── app.py                    # アプリ本体 (開始画面 → 出題画面 → 結果画面)
-    ├── exam_core.py              # 章ごとの出題数などの定数、問題・履歴の読み書き
-    ├── exams/
-    │   └── exam-01.json          # 問題データ (1回分 = 1ファイル)
-    ├── results/history.json      # 受験履歴 (受験すると作成される)
-    ├── scripts/validate_exams.py # 問題データの検証スクリプト
-    ├── tests/                    # AppTest によるアプリのテスト
-    └── pyproject.toml / uv.lock  # 依存関係 (uv で管理)
+└── pyproject.toml / uv.lock      # 依存関係 (uv で管理)
 ```
 
 ### 教科書 (`textbook/`) について
 
-教科書のテキストは git で管理していません。リポジトリを clone した場合は、`exam3/textbook/` に「章.節」フォルダ(`1.1/` 〜 `18.2/`)を置いてください。
+教科書のテキストは git で管理していません。リポジトリを clone した場合は、`textbook/` に「章.節」フォルダ(`1.1/` 〜 `18.2/`)を置いてください。
 
 - アプリでの受験だけなら、教科書は不要です。
 - 検証スクリプトと `/new-exam` には必要です。フォルダがある章・節だけを出題範囲として扱います。
@@ -90,13 +88,13 @@ exam3/
 
 ### 次の回を追加する
 
-Claude Code で親ディレクトリ `exam3/` を開いて、次を実行します(`textbook/` に教科書が必要です)。
+Claude Code でこのディレクトリを開いて、次を実行します(`textbook/` に教科書が必要です)。
 
 ```
 /new-exam
 ```
 
-教科書を章ごとに読んで40問を作問し、実行確認・検証スクリプト・テストまで行って `exams/exam-NN.json` を追加します。手順は `../.claude/commands/new-exam.md` にあります。
+教科書を章ごとに読んで40問を作問し、実行確認・検証スクリプト・テストまで行って `exams/exam-NN.json` を追加します。手順は `.claude/commands/new-exam.md` にあります。
 
 ## 検証とテスト
 
@@ -108,7 +106,7 @@ uv run scripts/validate_exams.py
 uv run pytest -q
 ```
 
-検証スクリプトは全回の JSON について次の点を検査し、節ごとの出題済み回数の一覧も出力します。エラーがあると終了コード 1 で終わります。教科書はデフォルトで `../textbook/` を参照します。別の場所にある場合は `--textbook <ディレクトリ>` で指定してください。
+検証スクリプトは全回の JSON について次の点を検査し、節ごとの出題済み回数の一覧も出力します。エラーがあると終了コード 1 で終わります。教科書はデフォルトで `textbook/` を参照します。別の場所にある場合は `--textbook <ディレクトリ>` で指定してください。
 
 - 40問あること、章ごとの出題数が規定どおりであること
 - 選択肢が4つで重複がないこと、answerIndex が 0〜3 であること、必須項目が埋まっていること

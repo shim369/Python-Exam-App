@@ -1,5 +1,20 @@
+# uv / 仮想環境
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# テスト
+.pytest_cache/
+
+# 受験履歴 (個人の記録。受験すると自動で作成される)
+results/
+
+# OS / エディター
+.DS_Store
+.vscode/
+.idea/
+
 # 教科書のテキスト (著作物のため管理対象外)
 textbook/
-
-# OS
-.DS_Store

@@ -5,7 +5,7 @@ argument-hint: "[回番号(省略時は次の番号)]"
 
 # 模擬試験を1回分追加する
 
-`mock-exam-app/exams/` に次の回の `exam-NN.json`(40問)を追加する。回番号は `$ARGUMENTS` で指定されていればそれを使い、なければ既存の最大番号 + 1 にする(2桁ゼロ埋め。例: `exam-02.json`)。
+`exams/` に次の回の `exam-NN.json`(40問)を追加する。回番号は `$ARGUMENTS` で指定されていればそれを使い、なければ既存の最大番号 + 1 にする(2桁ゼロ埋め。例: `exam-02.json`)。
 アプリのコードは変更しない。JSON を追加するだけで開始画面に回が増える。
 
 ## 前提
@@ -13,15 +13,15 @@ argument-hint: "[回番号(省略時は次の番号)]"
 - 教科書: `textbook/` 直下の「章.節」フォルダ(例: `textbook/3.3/`)。中の `3_3_1.txt` などが本文。ファイル名に揺れがある(`Ch1_list`、`Ch4_4_list.tx`、`Ch13_4_lst.txt` など)ので、すべてテキストとして読む(`.DS_Store` などの隠しファイルは除く)。`Ch*_list*` は節の要点まとめ。
 - **フォルダが存在する章・節だけが出題範囲**。フォルダのない章・節からは出題しない。
 - 教科書フォルダの中身は変更しない。
-- 教科書は Python 3.14 前提。環境は uv で管理している(`mock-exam-app/pyproject.toml`、`.python-version` は 3.14)。実行確認には `uv run --project mock-exam-app python` を使う。システムの `python3` は 3.9 なので使わない。環境がなければ `cd mock-exam-app && uv sync` で作る。
+- 教科書は Python 3.14 前提。環境は uv で管理している(`pyproject.toml`、`.python-version` は 3.14)。実行確認には `uv run python` を使う。システムの `python3` は 3.9 なので使わない。環境がなければ `uv sync` で作る。
 - 作業用のスクリプトや一時ファイルはスクラッチパッドに置き、リポジトリに残さない。
 
 ## 手順
 
 ### 1. 既存の回を把握する(重複の禁止・最重要)
 
-1. `mock-exam-app/exams/exam-*.json` を**すべて**読み、出題済みの topic・問題文・コードを一覧にする。
-2. `uv run --project mock-exam-app mock-exam-app/scripts/validate_exams.py` を実行し、末尾に出る「節ごとの出題済み回数」を確認する。
+1. `exams/exam-*.json` を**すべて**読み、出題済みの topic・問題文・コードを一覧にする。
+2. `uv run scripts/validate_exams.py` を実行し、末尾に出る「節ごとの出題済み回数」を確認する。
 3. **出題回数が少ない節(特に「← 未出題」の節)と、まだ出題していない論点を優先する**。同じ節から再び出題するのは構わないが、論点か切り口を必ず変える。
 4. 過去の回と同じ問題は作らない。数値・変数名・値だけを変えた焼き直しも同じ問題とみなす。
 
@@ -91,7 +91,7 @@ argument-hint: "[回番号(省略時は次の番号)]"
 
 ### 5. 検証
 
-1. **出力や例外を問う問題は、すべて `uv run --project mock-exam-app python` で実際に実行して正解を確認する。** 選択肢の文字列と実行結果が完全に一致することを確かめる。
+1. **出力や例外を問う問題は、すべて `uv run python` で実際に実行して正解を確認する。** 選択肢の文字列と実行結果が完全に一致することを確かめる。
 2. 誤答の選択肢がコードの場合は、それぞれ実行して本当に誤り(目的を満たさない・例外になる等)であることも確認する。
 3. 実行環境だけでは確認できないものは、ツールで確認する:
    - Ruff の挙動: `uvx ruff check --select ... --output-format concise`
@@ -99,8 +99,8 @@ argument-hint: "[回番号(省略時は次の番号)]"
    - HTTP: ローカルに `http.server` を立てて確認する(外部サイトにアクセスしない)
    - pip: スクラッチパッドに一時的な仮想環境を作って確認する(`uv venv --python 3.14 --seed` で作ると pip が入る)
 4. **実行結果が教科書の記述と食い違う問題は採用しない**(例: 教科書の f-string の `{name=}` の例は、引用符のない出力になっていて実際の出力と食い違う)。
-5. `uv run --project mock-exam-app mock-exam-app/scripts/validate_exams.py` を実行し、**エラー0件**にする。警告(類似・節の偏り・位置参照)が出たら内容を確認し、焼き直しなら作り直す。
-6. `cd mock-exam-app && uv run pytest -q` を実行し、AppTest がすべて通ることを確認する。
+5. `uv run scripts/validate_exams.py` を実行し、**エラー0件**にする。警告(類似・節の偏り・位置参照)が出たら内容を確認し、焼き直しなら作り直す。
+6. `uv run pytest -q` を実行し、AppTest がすべて通ることを確認する。
 
 ### 6. 完了時の報告
 

@@ -1,5 +1,5 @@
 [project]
-name = "mock-exam-app"
+name = "python-exam-app"
 version = "0.1.0"
 description = "Python 3 エンジニア認定実践試験の模擬試験アプリ (Streamlit)"
 requires-python = ">=3.14"
